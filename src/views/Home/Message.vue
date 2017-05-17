@@ -17,12 +17,29 @@
         <mu-menu-item title="Drive Assistant" leftIcon="remove_red_eye" class="menu-item"/>
         <mu-menu-item title="Task Assistant" leftIcon="remove_red_eye" class="menu-item"/>
         <mu-menu-item title="Paragraph" leftIcon="¶" class="menu-item"/>
-        <mu-menu-item title="Section" leftIcon="§" class="menu-item"/>
+        <mu-menu-item title="Sign Up" leftIcon="§" class="menu-item" :to="`${path}/signup`"/>
       </mu-menu>
     </div>
     <router-view></router-view>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      id: 0,
+      name: '',
+      password: '',
+    };
+  },
+  computed: {
+    path() {
+      return `/home/${this.id}/message`;
+    },
+  },
+};
+</script>
 
 <style scoped lang="less">
   @import "~muse-ui/src/styles/colors.less";

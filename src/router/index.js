@@ -2,11 +2,13 @@ import Vue from 'vue';
 import Router from 'vue-router';
 
 import Home from '@/views/Home/Main';
-import Message from '@/views/Home/Message';
 import Task from '@/views/Home/Task';
 import Calender from '@/views/Home/Calender';
 import Drive from '@/views/Home/Drive';
 import Contacts from '@/views/Home/Contacts';
+
+import Message from '@/views/Home/Message';
+import SignUp from '@/components/Message/SignUp';
 
 Vue.use(Router);
 
@@ -25,6 +27,13 @@ const router = new Router({
           path: 'message',
           name: 'Message',
           component: Message,
+          children: [
+            {
+              path: 'signup',
+              name: 'SignUp',
+              component: SignUp,
+            },
+          ],
         },
         {
           path: 'task',
