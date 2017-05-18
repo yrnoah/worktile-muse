@@ -13,11 +13,11 @@
         <input placeholder="Search Member or Message" class="search-item"/>
       </div>
       <mu-menu class="nav-menu">
-        <mu-menu-item title="general" leftIcon="remove_red_eye" class="menu-item"/>
-        <mu-menu-item title="Drive Assistant" leftIcon="remove_red_eye" class="menu-item"/>
+        <mu-menu-item title="Chat Message" leftIcon="remove_red_eye" class="menu-item" :to="`${path}/chat-room`"/>
+        <!--<mu-menu-item title="Drive Assistant" leftIcon="remove_red_eye" class="menu-item"/>
         <mu-menu-item title="Task Assistant" leftIcon="remove_red_eye" class="menu-item"/>
-        <mu-menu-item title="Paragraph" leftIcon="¶" class="menu-item"/>
-        <mu-menu-item title="Sign Up" leftIcon="§" class="menu-item" :to="`${path}/signup`"/>
+        <mu-menu-item title="Paragraph" leftIcon="¶" class="menu-item"/>-->
+        <mu-menu-item title="Add User" leftIcon="remove_red_eye" class="menu-item" :to="`${path}/sign-up`"/>
       </mu-menu>
     </div>
     <router-view></router-view>

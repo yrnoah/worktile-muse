@@ -9,6 +9,7 @@ import Contacts from '@/views/Home/Contacts';
 
 import Message from '@/views/Home/Message';
 import SignUp from '@/components/Message/SignUp';
+import ChatRoom from '@/components/Message/ChatRoom';
 
 Vue.use(Router);
 
@@ -29,9 +30,14 @@ const router = new Router({
           component: Message,
           children: [
             {
-              path: 'signup',
+              path: 'sign-up',
               name: 'SignUp',
               component: SignUp,
+            },
+            {
+              path: 'chat-room',
+              name: 'ChatRoom',
+              component: ChatRoom,
             },
           ],
         },
@@ -62,8 +68,9 @@ const router = new Router({
 
 /* eslint-disable no-param-reassign */
 router.beforeEach((to, from, next) => {
-  if (to.path === '/home') {
-    next({ path: '/home/0/message', from });
+  const routes = ['/home/', '/home'];
+  if (routes.indexOf(to.path) > -1) {
+    next({ path: '/home/0/message/chat-room', from });
     return;
   }
   next();
