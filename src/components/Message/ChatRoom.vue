@@ -22,7 +22,24 @@
         <mu-divider inset/>
       </template>
     </mu-list>
-    <div class="danmu"></div>
+    <transition-group>
+      <canvas
+        v-for="(message, index) in messages.slice(0, 10)"
+        :key="index"
+        :id="`danmu${index}`"
+        class="danmu"
+        :width="getCanvasWidth(message.CONTENT)"
+        :height="canvasYSize"
+        :style="canvasStyle(index, message.CONTENT)">
+      </canvas>
+      <!-- 问题： 使用p标签的存放弹幕的话，暂未找到较好的方法测量字符串长度，从而使动画开始时的初始位置在屏幕之外 -->
+      <!-- 问题： 使用canvas 暂未找到较好方法在vue中修改keyframe使动画适配当前屏幕宽度 -->
+      <!--<p v-for="(message, index) in messages"
+        :key="index"
+        :id="`danmu${index}`"
+        class="danmu"
+        :style="canvasStyle(index)">{{message.CONTENT}}</p>-->
+    </transition-group>
   </div>
 </template>
 
@@ -36,6 +53,10 @@ export default {
       inputErrorText: '',
       messages: [],
       user: null,
+      canvasXSize: 200,
+      canvasYSize: 30,
+      contentSended: false,
+      canvasTopDistanceOffset: 0, // 超出一屏高度后使弹幕再次从顶部开始渲染
     };
   },
   computed: {
@@ -71,6 +92,7 @@ export default {
           USER: user.NAME,
         };
         this.messages = [newMessage, ...this.messages];
+        this.contentSended = true;
       });
       this.content = '';
     },
@@ -84,7 +106,69 @@ export default {
     getMessages() {
       return axios.get('/api/get_messages').then((resp) => {
         this.messages = [...resp.data.result].reverse();
+        setTimeout(this.initCanvas);
       });
+    },
+    // 测量弹幕字符串宽度
+    measureTextWidth(content) {
+      const canvas = document.createElement('CANVAS');
+      if (canvas.getContext) {
+        const ctx = document.createElement('CANVAS').getContext('2d');
+        ctx.font = '20px serif';
+        const text = ctx.measureText(content);
+        return (text && text.width) || 0;
+      }
+      return 0;
+    },
+    getCanvasWidth(text) {
+      return this.measureTextWidth(text);
+    },
+    // 初始化每个弹幕canvas属性
+    initCanvas() {
+      const canvas = document.querySelectorAll('.danmu');
+      if (canvas.length && canvas[0].getContext) {
+        canvas.forEach((c, index) => {
+          const ctx = c.getContext('2d');
+          const text = this.messages[index].CONTENT;
+          // const textWidth = this.measureTextWidth(text);
+          // if (!textWidth) return;
+          // this.canvasXSize = textWidth;
+          setTimeout(() => this.drawCanvas(ctx, text));
+        });
+      }
+    },
+    // 绘制
+    drawCanvas(ctx, text) {
+      ctx.clearRect(0, 0, this.canvasXSize, this.canvasYSize);
+      ctx.font = '20px serif';
+      const colors = ['#f44336', '#9c27b0', '#4fc3f7', '#1976d2', '#ffc107'];
+      ctx.fillStyle = colors[Math.floor(Math.random() * 5)];
+      ctx.fillText(text, 0, 20);
+    },
+    canvasStyle(index, text) {
+      // const danmuEl = document.querySelector(`#danmu${index}`);
+      // const danmuEl = this.$children[3] && this.$children[3].$el.children;
+      // if (!danmuEl) return null;
+      const colors = ['#f44336', '#9c27b0', '#4fc3f7', '#1976d2', '#ffc107'];
+      const baseIndex = index - this.canvasTopDistanceOffset;
+      const pageTopPadding = 20;
+      const lineHeight = 20;
+      let topDistance = (lineHeight * baseIndex) + pageTopPadding;
+      if (topDistance > this.$el.clientHeight) {
+        this.canvasTopDistanceOffset = index - 1;
+        topDistance = (lineHeight * 1) + pageTopPadding;
+      }
+      let style;
+      if (index >= 0) {
+        style = `top: ${topDistance}px; animation: scroll 8s linear; animation-delay: ${index * 0.8}s;` +
+                `right: ${-1 * this.getCanvasWidth(text)}px;` +
+                `color: ${colors[Math.floor(Math.random() * 5)]};`;
+                // `right: ${-1 * this.getCanvasWidth(text)}px;` +
+                // `right: ${-1 * danmuEl.clientWidth}px;` +
+      } else {
+        // 输入新的文字后弹幕的样式
+      }
+      return style;
     },
   },
 };
@@ -117,11 +201,24 @@ export default {
   }
   .danmu {
     position: fixed;
-    top: 20%;
-    left: 20%;
-    width: 500px;
-    height: 50px;
-    outline: 1px solid red;
-    background-color: rgba(0, 0, 0, .2);
+    // font-size: 20px;
+    // top: 20%;
+    // left: 20%;
+    // right: 0;
+    // top: 20px;
+    // outline: 1px solid red;
+    // background-color: rgba(0, 0, 0, .2);
+  }
+  // .scrollX {
+  //   animation: scroll 8s linear;
+  // }
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      // todo: 如何动态传入页面宽度及文字宽度
+      transform: translateX(-2000px);
+    }
   }
 </style>
