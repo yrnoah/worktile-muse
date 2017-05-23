@@ -32,8 +32,9 @@
         :height="canvasYSize"
         :style="canvasStyle(index, message.CONTENT)">
       </canvas>
+      <!-- 问题： 若使用全屏单一canvas绘制弹幕效果，则canvas置顶层，当前页面为不可点击区域；解决？： 设计层面解决canvas位置 -->
       <!-- 问题： 使用p标签的存放弹幕的话，暂未找到较好的方法测量字符串长度，从而使动画开始时的初始位置在屏幕之外 -->
-      <!-- 问题： 使用canvas 暂未找到较好方法在vue中修改keyframe使动画适配当前屏幕宽度 -->
+      <!-- 问题： 使用canvas 暂未找到较好方法在vue中修改keyframe使动画适配当前屏幕宽度; 目前方案 css3 vw, vh, vmax, vmin unit -->
       <!--<p v-for="(message, index) in messages"
         :key="index"
         :id="`danmu${index}`"
@@ -93,6 +94,7 @@ export default {
         };
         this.messages = [newMessage, ...this.messages];
         this.contentSended = true;
+        this.createDamku(content);
       });
       this.content = '';
     },
@@ -111,13 +113,15 @@ export default {
     },
     // 测量弹幕字符串宽度
     measureTextWidth(content) {
-      const canvas = document.createElement('CANVAS');
+      let canvas = document.createElement('CANVAS');
       if (canvas.getContext) {
-        const ctx = document.createElement('CANVAS').getContext('2d');
+        const ctx = canvas.getContext('2d');
         ctx.font = '20px serif';
         const text = ctx.measureText(content);
+        canvas = null;
         return (text && text.width) || 0;
       }
+      canvas = null;
       return 0;
     },
     getCanvasWidth(text) {
@@ -145,11 +149,25 @@ export default {
       ctx.fillStyle = colors[Math.floor(Math.random() * 5)];
       ctx.fillText(text, 0, 20);
     },
+    createDamku(content) {
+      const newDanmu = document.createElement('CANVAS');
+      const parent = document.querySelector('.room-layout');
+      if (newDanmu.getContext) {
+        const ctx = newDanmu.getContext('2d');
+        const width = this.measureTextWidth(content); // ctx.measureText(text);
+        newDanmu.width = width;
+        newDanmu.height = 30;
+        newDanmu.style.cssText = `position: fixed; top: 100px; right: ${-1 * width}px; animation: scroll 8s linear;`;
+        ctx.font = '20px serif';
+        ctx.fillStyle = '#ffc107';
+        ctx.fillText(content, 0, 20);
+      }
+      parent.append(newDanmu);
+    },
     canvasStyle(index, text) {
       // const danmuEl = document.querySelector(`#danmu${index}`);
       // const danmuEl = this.$children[3] && this.$children[3].$el.children;
       // if (!danmuEl) return null;
-      const colors = ['#f44336', '#9c27b0', '#4fc3f7', '#1976d2', '#ffc107'];
       const baseIndex = index - this.canvasTopDistanceOffset;
       const pageTopPadding = 20;
       const lineHeight = 20;
@@ -161,12 +179,8 @@ export default {
       let style;
       if (index >= 0) {
         style = `top: ${topDistance}px; animation: scroll 8s linear; animation-delay: ${index * 0.8}s;` +
-                `right: ${-1 * this.getCanvasWidth(text)}px;` +
-                `color: ${colors[Math.floor(Math.random() * 5)]};`;
-                // `right: ${-1 * this.getCanvasWidth(text)}px;` +
-                // `right: ${-1 * danmuEl.clientWidth}px;` +
-      } else {
-        // 输入新的文字后弹幕的样式
+                `right: ${-1 * this.getCanvasWidth(text)}px;`;
+                // `right: ${-1 * danmuEl.clientWidth}px;`;
       }
       return style;
     },
@@ -217,8 +231,9 @@ export default {
       transform: translateX(0);
     }
     100% {
-      // todo: 如何动态传入页面宽度及文字宽度
-      transform: translateX(-2000px);
+      // vw unit: Viewport-percentage. Equal to the 1% of vw.
+      // vmax unit: Equal to the 1% larger of vw or vh.
+      transform: translateX(-110vw);
     }
   }
 </style>
