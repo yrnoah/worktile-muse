@@ -23,6 +23,7 @@
       </template>
     </mu-list>
     <transition-group>
+      <!-- 问题： 若使用全屏单一canvas绘制弹幕效果，则canvas置顶层，当前页面为不可点击区域；解决？： 设计层面解决canvas位置 -->
       <canvas
         v-for="(message, index) in messages.slice(0, 10)"
         :key="index"
@@ -32,9 +33,9 @@
         :height="canvasYSize"
         :style="canvasStyle(index, message.CONTENT)">
       </canvas>
-      <!-- 问题： 若使用全屏单一canvas绘制弹幕效果，则canvas置顶层，当前页面为不可点击区域；解决？： 设计层面解决canvas位置 -->
       <!-- 问题： 使用p标签的存放弹幕的话，暂未找到较好的方法测量字符串长度，从而使动画开始时的初始位置在屏幕之外 -->
-      <!-- 问题： 使用canvas 暂未找到较好方法在vue中修改keyframe使动画适配当前屏幕宽度; 目前方案 css3 vw, vh, vmax, vmin unit -->
+      <!-- 问题： 使用canvas 暂未找到较好方法在vue中修改keyframe使动画适配当前屏幕宽度;
+                 目前方案 css3 vw, vh, vmax, vmin unit -->
       <!--<p v-for="(message, index) in messages"
         :key="index"
         :id="`danmu${index}`"

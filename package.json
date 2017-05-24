@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
-    "build": "node build/build.js",
+    "build": "node build/build.js && babel-node build/prod-server.js",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run unit && npm run e2e",
@@ -86,7 +86,11 @@
     "webpack-bundle-analyzer": "^2.2.1",
     "webpack-dev-middleware": "^1.10.0",
     "webpack-hot-middleware": "^2.18.0",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "morgan": "^1.7.0",
+    "request-ip": "^1.2.3",
+    "swig": "^1.4.2",
+    "cookie-parser": "^1.4.3"
   },
   "engines": {
     "node": ">= 4.0.0",
